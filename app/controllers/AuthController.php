@@ -1,15 +1,17 @@
 <?php
+// app/controllers/AuthController.php
+require_once __DIR__ . '/../models/User.php';
 
 class AuthController extends Controller
 {
     public function login()
     {
-        // Jika sudah login, redirect ke dashboard
-        if(isset($_SESSION['user'])) {
+        // jika sudah login redirect dashboard
+        if (isset($_SESSION['user'])) {
             header('Location: /dashboard');
             exit;
         }
-
+        // view login (login.php akan include layout auth)
         $this->view('auth/login');
     }
 
@@ -18,23 +20,29 @@ class AuthController extends Controller
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
-        // Contoh query user (sesuaikan dengan model User)
         $userModel = new User();
         $user = $userModel->findByEmail($email);
 
-        if($user && password_verify($password, $user['password'])) {
-            $_SESSION['user'] = $user;
+        if ($user && password_verify($password, $user['password'])) {
+            // set trimmed minimal user session
+            $_SESSION['user'] = [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'role' => $user['role'],
+                'email' => $user['email']
+            ];
             header('Location: /dashboard');
             exit;
-        } else {
-            $_SESSION['error'] = "Email atau password salah!";
-            header('Location: /login');
-            exit;
         }
+
+        $_SESSION['error'] = 'Email atau password salah';
+        header('Location: /login');
+        exit;
     }
 
     public function logout()
     {
+        session_unset();
         session_destroy();
         header('Location: /login');
         exit;
