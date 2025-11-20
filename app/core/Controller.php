@@ -1,14 +1,20 @@
 <?php
-
-class Controller {
-
-    public function view($view, $data = []) {
+// app/core/Controller.php
+class Controller
+{
+    protected function view(string $view, array $data = []): void
+    {
+        // $viewPath relatif ke /app/views/
+        $viewPath = __DIR__ . '/../views/' . $view . '.php';
         extract($data);
-        require_once "../app/views/" . $view . ".php";
+
+        // jika layout spesifik (auth) view akan include layout sendiri
+        require $viewPath;
     }
 
-    public function model($model) {
-        require_once "../app/models/" . $model . ".php";
+    protected function model(string $model)
+    {
+        require_once __DIR__ . '/../models/' . $model . '.php';
         return new $model;
     }
 }
