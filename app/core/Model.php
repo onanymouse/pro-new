@@ -1,21 +1,24 @@
 <?php
-
-class Model {
+// app/core/Model.php
+class Model
+{
     protected $db;
 
-    public function __construct() {
-        $this->db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-
-        if ($this->db->connect_error) {
-            die("Database Error: " . $this->db->connect_error);
+    public function __construct()
+    {
+        // load config DB
+        $cfg = __DIR__ . '/../config/database.php';
+        if (!file_exists($cfg)) {
+            throw new \Exception("Database config not found: app/config/database.php");
         }
-    }
+        require $cfg;
 
-    public function query($sql) {
-        return $this->db->query($sql);
-    }
-
-    public function escape($text) {
-        return $this->db->real_escape_string($text);
+        // gunakan PDO
+        $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ];
+        $this->db = new PDO($dsn, DB_USER, DB_PASS, $options);
     }
 }
